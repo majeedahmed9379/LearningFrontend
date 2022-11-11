@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Avatar, Button, Card, Title, Paragraph } from "react-native-paper";
 const { Question } = require("./components/childLearning/question");
 const { InfoScreen } = require("./components/childLearning/infoScreen");
-const { Home } = require("./components/childLearning/statsScreen");
+const { Stats } = require("./components/childLearning/statsScreen");
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -13,11 +13,6 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {/* <Stack.Screen
-          name="Home"
-          component={Home}
-          options={{ headerShown: false }}
-        /> */}
         <Stack.Screen
           name="Question"
           component={Question}
@@ -26,6 +21,11 @@ export default function App() {
         <Stack.Screen
           name="InfoScreen"
           component={InfoScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Stats"
+          component={Stats}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

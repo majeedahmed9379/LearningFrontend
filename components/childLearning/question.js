@@ -1,24 +1,105 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
+const axios = require("axios").default;
 import {
   StyleSheet,
   View,
   TouchableOpacity,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
 import { Card, Title, RadioButton, Button, Text } from "react-native-paper";
+const { default: ip } = require("../../assets/ip");
+
+async function fetchQuestion() {
+  return await axios
+    .get(`http://${ip}:4000/question/get/633c619d920880851ec036c3`)
+
+    .then(function (response) {
+      // handle success
+      return response.data.question;
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error.message);
+    })
+    .finally(function () {
+      // always executed
+    });
+}
+
+async function saveAnswer(ans) {
+  console.log(ans);
+  await axios
+    .post(`http://${ip}:4000/answer/create/633c619d920880851ec036c3`, ans)
+
+    .then(function (response) {
+      // handle success
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error.message);
+    });
+}
 
 export function Question({ navigation }) {
-  const question = {
-    statement: "What is the synonym of charming?",
-    options: [
-      { statement: "Gleaming", is_correct: true },
-      { statement: "Beautiful", is_correct: false },
-      { statement: "Ugly", is_correct: false },
-    ],
-  };
+  const [loading, setLoading] = useState(true);
+  const [question, setQuestion] = useState({});
+  const [value, setValue] = useState();
+  const [refresh, setRefresh] = useState(false);
 
-  const [value, setValue] = useState(question.options[0]);
+  useEffect(() => {
+    async function LoadQuestion() {
+      await fetchQuestion().then(function (response) {
+        setQuestion(response);
+        if (response) setValue(response.options[0]);
+        console.log(response);
+        setLoading(false);
+        setRefresh(false);
+      });
+    }
+    LoadQuestion();
+    // setQuestion(q);
+  }, [refresh]);
+  // const question = {
+  //
+  // };
+
+  if (loading)
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: "center" }}>Loading</Text>
+        <ActivityIndicator size="large" color="#00ff00" />
+      </View>
+    );
+  if (!question) {
+    console.log("here");
+    return (
+      <View style={styles.noQuestionContainer}>
+        <Text style={{ textAlign: "center" }}>No more questions left now!</Text>
+        <Button
+          mode="elevateds"
+          style={{ ...styles.button, top: 30 }}
+          onPress={() => {
+            navigation.navigate("Stats");
+          }}
+        >
+          Stats
+        </Button>
+
+        <Button
+          mode="elevated"
+          style={{ ...styles.button, top: 30 }}
+          onPress={() => {
+            setRefresh(true);
+          }}
+        >
+          <Text style={styles.text}>Refresh</Text>
+        </Button>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -37,6 +118,7 @@ export function Question({ navigation }) {
             <Title style={styles.title}>{question.statement}</Title>
             <RadioButton.Group
               onValueChange={(selectedValue) => {
+                console.log(selectedValue);
                 setValue(
                   question.options.filter(
                     (v) => v.statement === selectedValue
@@ -64,7 +146,18 @@ export function Question({ navigation }) {
           </Card.Content>
           <Card.Actions style={{ alignItems: "center" }}></Card.Actions>
         </Card>
-        <TouchableOpacity onPress={() => console.log(value)}>
+        <TouchableOpacity
+          onPress={async () => {
+            // console.log(value);
+            const ans = {
+              question: question._id,
+              selectedOption: value.statement,
+              isCorrect: value.isCorrect,
+              childId: "633c619d920880851ec036c3",
+            };
+            await saveAnswer(ans).then(setRefresh(true));
+          }}
+        >
           <Text
             style={{
               color: "white",
@@ -81,7 +174,7 @@ export function Question({ navigation }) {
         <TouchableOpacity
           style={{ ...styles.button, top: 30 }}
           onPress={() => {
-            navigation.navigate("InfoScreen");
+            navigation.navigate("InfoScreen", { content: question.content });
           }}
         >
           <Text style={styles.text}> View the info again </Text>
@@ -96,6 +189,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#d1fff2",
     height: "100%",
     justifyContent: "center",
+  },
+  noQuestionContainer: {
+    backgroundColor: "#d1fff2",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   option: {
     textAlign: "center",

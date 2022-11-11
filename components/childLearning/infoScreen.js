@@ -4,16 +4,14 @@ import { StyleSheet, View, ImageBackground } from "react-native";
 import { Card, Title, Button, Text } from "react-native-paper";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 
-export function InfoScreen({ navigation }) {
+export function InfoScreen({ route, navigation }) {
   const [doneReading, setDoneReading] = useState(false);
 
   useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
       if (!doneReading) {
-        console.log("should not return");
         e.preventDefault();
       } else {
-        console.log("will  return");
         navigation.dispatch(e.data.action);
       }
     });
@@ -34,26 +32,26 @@ export function InfoScreen({ navigation }) {
       />
       <View style={styles.cardView}>
         <Card style={styles.card}>
-          <Title style={styles.title}>
-            Remeber! The synonym of Beautiful is "Charming"
-          </Title>
+          <Title style={styles.title}>{route.params.content}</Title>
         </Card>
       </View>
-      <CountdownCircleTimer
-        isPlaying={true}
-        duration={10}
-        size={100}
-        strokeWidth={5}
-        colors={["#ff5e5e", "#ffa15e", "#ffdc5e", "#5eff79"]}
-        colorsTime={[10, 7, 4, 2]}
-        onComplete={() => {
-          setDoneReading(true);
-        }}
-      >
-        {({ remainingTime, color }) => (
-          <Text style={{ color, fontSize: 20 }}>{remainingTime}</Text>
-        )}
-      </CountdownCircleTimer>
+      <View style={styles.timer}>
+        <CountdownCircleTimer
+          isPlaying={true}
+          duration={3}
+          size={100}
+          strokeWidth={5}
+          colors={["#ff5e5e", "#ffa15e", "#ffdc5e", "#5eff79"]}
+          colorsTime={[10, 7, 4, 2]}
+          onComplete={() => {
+            setDoneReading(true);
+          }}
+        >
+          {({ remainingTime, color }) => (
+            <Text style={{ color, fontSize: 20 }}>{remainingTime}</Text>
+          )}
+        </CountdownCircleTimer>
+      </View>
     </View>
   );
   if (!doneReading) {
@@ -74,15 +72,18 @@ export function InfoScreen({ navigation }) {
       />
       <View style={styles.cardView}>
         <Card style={styles.card}>
-          <Title style={styles.title}>
-            Remeber! The synonym of Beautiful is "Charming"
-          </Title>
+          <Title style={styles.title}>{route.params.content}</Title>
         </Card>
       </View>
       <Button
         mode="outlined"
         color={"#36DB7B"}
-        style={{ marginTop: 50, padding: 10, borderRadius: 30 }}
+        style={{
+          position: "relative",
+          marginTop: "50%",
+          padding: 10,
+          borderRadius: 30,
+        }}
         onPress={() => {
           navigation.navigate("Question");
         }}
@@ -129,5 +130,9 @@ const styles = StyleSheet.create({
     borderColor: "#808080",
     paddingBottom: 20,
     color: "green",
+  },
+  timer: {
+    position: "relative",
+    marginTop: "50%",
   },
 });
